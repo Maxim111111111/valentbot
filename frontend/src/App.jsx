@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import CreateCard from './pages/CreateCard';
-import ViewCard from './pages/ViewCard';
-import GameScreen from './pages/GameScreen';
-import ResultsScreen from './pages/ResultsScreen';
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import CreateCard from "./pages/CreateCard";
+import ViewCard from "./pages/ViewCard";
+import GameScreen from "./pages/GameScreen";
+import ResultsScreen from "./pages/ResultsScreen";
 
 function App() {
-  const [screen, setScreen] = useState('home');
+  const [screen, setScreen] = useState("home");
   const [cardId, setCardId] = useState(null);
   const [gameResult, setGameResult] = useState(null);
 
@@ -15,71 +15,65 @@ function App() {
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.setBackgroundColor('#ffffff');
+      window.Telegram.WebApp.setBackgroundColor("#ffffff");
     }
 
     // Проверяем URL параметры для загрузки карточки
     const params = new URLSearchParams(window.location.search);
-    const startParam = params.get('startapp');
+    const startParam = params.get("startapp");
     if (startParam) {
       setCardId(startParam);
-      setScreen('view');
+      setScreen("view");
     }
   }, []);
 
   const handleCreateCard = (id) => {
     setCardId(id);
-    setScreen('share');
+    setScreen("share");
   };
 
   const handleStartGame = () => {
-    setScreen('game');
+    setScreen("game");
   };
 
   const handleGameComplete = (score) => {
     setGameResult({ score, cardId });
-    setScreen('results');
+    setScreen("results");
   };
 
   const handleBackHome = () => {
-    setScreen('home');
+    setScreen("home");
     setCardId(null);
     setGameResult(null);
   };
 
   return (
     <div className="app">
-      {screen === 'home' && (
-        <CreateCard 
+      {screen === "home" && (
+        <CreateCard
           onCardCreated={handleCreateCard}
-          onViewCard={() => setScreen('view')}
+          onViewCard={() => setScreen("view")}
         />
       )}
-      {screen === 'view' && cardId && (
-        <ViewCard 
+      {screen === "view" && cardId && (
+        <ViewCard
           cardId={cardId}
           onPlayGame={handleStartGame}
           onBack={handleBackHome}
         />
       )}
-      {screen === 'game' && cardId && (
-        <GameScreen 
+      {screen === "game" && cardId && (
+        <GameScreen
           cardId={cardId}
           onComplete={handleGameComplete}
-          onCancel={() => setScreen('view')}
+          onCancel={() => setScreen("view")}
         />
       )}
-      {screen === 'results' && gameResult && (
-        <ResultsScreen 
-          result={gameResult}
-          onNewCard={handleBackHome}
-        />
+      {screen === "results" && gameResult && (
+        <ResultsScreen result={gameResult} onNewCard={handleBackHome} />
       )}
-      {screen === 'share' && cardId && (
-        <ShareCard 
-          cardId={cardId}
-          onBack={handleBackHome}
-        />
+      {screen === "share" && cardId && (
+        <ShareCard cardId={cardId} onBack={handleBackHome} />
       )}
     </div>
   );
@@ -91,9 +85,9 @@ function ShareCard({ cardId, onBack }) {
 
   useEffect(() => {
     fetch(`/api/cards/${cardId}`)
-      .then(r => r.json())
+      .then((r) => r.json())
       .then(setCard)
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   }, [cardId]);
 
   const shareUrl = `https://t.me/valentinmvbot?startapp=${cardId}`;
@@ -101,14 +95,14 @@ function ShareCard({ cardId, onBack }) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: '💌 Valentine Game',
+        title: "💌 Valentine Game",
         text: `${card?.sender_name} отправил(а) тебе валентинку!`,
         url: shareUrl,
       });
     } else {
       // Fallback для копирования в буфер обмена
       navigator.clipboard.writeText(shareUrl);
-      alert('Ссылка скопирована!');
+      alert("Ссылка скопирована!");
     }
   };
 
@@ -118,7 +112,7 @@ function ShareCard({ cardId, onBack }) {
         <div className="success-icon">✨</div>
         <h1>Валентинка создана!</h1>
         <p>Поделись ссылкой с {card?.recipient_name}</p>
-        
+
         <div className="share-url">
           <input type="text" value={shareUrl} readOnly />
           <button onClick={handleShare}>📤 Поделиться</button>

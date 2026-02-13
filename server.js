@@ -23,10 +23,10 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Serve React app for all other routes (except when it's a 404 from API)
 app.use((req, res, next) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'), (err) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"), (err) => {
     if (err) {
       // Если нет dist, просто отправляем 404
-      res.status(404).send('Not found');
+      res.status(404).send("Not found");
     }
   });
 });

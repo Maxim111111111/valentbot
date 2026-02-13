@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import '../App.css';
+import React, { useState } from "react";
+import "../App.css";
 
 export default function CreateCard({ onCardCreated, onViewCard }) {
   const [step, setStep] = useState(1);
-  const [recipientName, setRecipientName] = useState('');
-  const [senderName, setSenderName] = useState('');
+  const [recipientName, setRecipientName] = useState("");
+  const [senderName, setSenderName] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [messageText, setMessageText] = useState('');
+  const [messageText, setMessageText] = useState("");
   const [media, setMedia] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -19,26 +19,26 @@ export default function CreateCard({ onCardCreated, onViewCard }) {
       reader.onload = (e) => {
         setMediaPreview({
           src: e.target.result,
-          type: file.type.split('/')[0],
+          type: file.type.split("/")[0],
         });
       };
       reader.readAsDataURL(file);
     } else {
-      alert('Файл должен быть не больше 20MB');
+      alert("Файл должен быть не больше 20MB");
     }
   };
 
   const handleNextStep = () => {
     if (!recipientName.trim()) {
-      alert('Введите имя получателя');
+      alert("Введите имя получателя");
       return;
     }
     if (!isAnonymous && !senderName.trim()) {
-      alert('Введите ваше имя или отметьте анонимную отправку');
+      alert("Введите ваше имя или отметьте анонимную отправку");
       return;
     }
     if (!messageText.trim()) {
-      alert('Введите текст поздравления');
+      alert("Введите текст поздравления");
       return;
     }
     setStep(2);
@@ -48,25 +48,25 @@ export default function CreateCard({ onCardCreated, onViewCard }) {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('recipient_name', recipientName);
-      formData.append('sender_name', senderName);
-      formData.append('is_anonymous', isAnonymous);
-      formData.append('message_text', messageText);
+      formData.append("recipient_name", recipientName);
+      formData.append("sender_name", senderName);
+      formData.append("is_anonymous", isAnonymous);
+      formData.append("message_text", messageText);
       if (media) {
-        formData.append('media', media);
+        formData.append("media", media);
       }
 
-      const response = await fetch('/api/cards', {
-        method: 'POST',
+      const response = await fetch("/api/cards", {
+        method: "POST",
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Ошибка создания валентинки');
+      if (!response.ok) throw new Error("Ошибка создания валентинки");
       const data = await response.json();
       onCardCreated(data.id);
     } catch (err) {
       console.error(err);
-      alert('Ошибка создания валентинки');
+      alert("Ошибка создания валентинки");
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function CreateCard({ onCardCreated, onViewCard }) {
       <div className="screen">
         <div className="container">
           <h1>💌 Создать валентинку</h1>
-          
+
           <div className="form-group">
             <label>Имя получателя *</label>
             <input
@@ -134,7 +134,7 @@ export default function CreateCard({ onCardCreated, onViewCard }) {
 
         <div className="form-group file-input">
           <label htmlFor="media" className="file-label">
-            {mediaPreview ? '✓ Файл загружен' : '📁 Выберите файл'}
+            {mediaPreview ? "✓ Файл загружен" : "📁 Выберите файл"}
           </label>
           <input
             id="media"
@@ -146,7 +146,7 @@ export default function CreateCard({ onCardCreated, onViewCard }) {
 
         {mediaPreview && (
           <div className="file-preview">
-            {mediaPreview.type === 'image' ? (
+            {mediaPreview.type === "image" ? (
               <img src={mediaPreview.src} alt="preview" />
             ) : (
               <video src={mediaPreview.src} controls />
@@ -154,12 +154,12 @@ export default function CreateCard({ onCardCreated, onViewCard }) {
           </div>
         )}
 
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           onClick={handleCreateCard}
           disabled={loading}
         >
-          {loading ? 'Создание...' : '🎉 Создать'}
+          {loading ? "Создание..." : "🎉 Создать"}
         </button>
 
         <button className="btn-secondary" onClick={() => setStep(1)}>

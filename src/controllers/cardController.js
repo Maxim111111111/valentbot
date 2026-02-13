@@ -1,22 +1,23 @@
-const { Card, GameResult } = require('../models');
-const cloudinary = require('../config/cloudinary');
-const { Op } = require('sequelize');
+const { Card, GameResult } = require("../models");
+const cloudinary = require("../config/cloudinary");
+const { Op } = require("sequelize");
 
 // Создание валентинки
 exports.createCard = async (req, res) => {
   try {
-    const { recipient_name, sender_name, is_anonymous, message_text } = req.body;
+    const { recipient_name, sender_name, is_anonymous, message_text } =
+      req.body;
     let media_url = null;
     let media_type = null;
 
     // Если есть файл, загружаем на Cloudinary
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: 'auto',
-        folder: 'valentine-game',
+        resource_type: "auto",
+        folder: "valentine-game",
       });
       media_url = result.secure_url;
-      media_type = req.file.mimetype.split('/')[0];
+      media_type = req.file.mimetype.split("/")[0];
     }
 
     const card = await Card.create({
@@ -35,7 +36,7 @@ exports.createCard = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Ошибка создания валентинки' });
+    res.status(500).json({ error: "Ошибка создания валентинки" });
   }
 };
 
@@ -46,13 +47,13 @@ exports.getCard = async (req, res) => {
     const card = await Card.findByPk(id);
 
     if (!card) {
-      return res.status(404).json({ error: 'Валентинка не найдена' });
+      return res.status(404).json({ error: "Валентинка не найдена" });
     }
 
     res.json({
       id: card.id,
       recipient_name: card.recipient_name,
-      sender_name: card.sender_name || 'Аноним',
+      sender_name: card.sender_name || "Аноним",
       is_anonymous: card.is_anonymous,
       message_text: card.message_text,
       media_url: card.media_url,
@@ -61,7 +62,7 @@ exports.getCard = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Ошибка получения валентинки' });
+    res.status(500).json({ error: "Ошибка получения валентинки" });
   }
 };
 
@@ -69,13 +70,14 @@ exports.getCard = async (req, res) => {
 exports.saveGameResult = async (req, res) => {
   try {
     const { card_id, score, telegramUserId, username } = req.body;
-    const telegram_user_id = telegramUserId || req.tg_user?.id || Math.round(Math.random() * 1000000);
-    const player_name = username || req.tg_user?.username || 'Anonymous';
+    const telegram_user_id =
+      telegramUserId || req.tg_user?.id || Math.round(Math.random() * 1000000);
+    const player_name = username || req.tg_user?.username || "Anonymous";
 
     // Проверяем, существует ли карточка
     const card = await Card.findByPk(card_id);
     if (!card) {
-      return res.status(404).json({ error: 'Карточка не найдена' });
+      return res.status(404).json({ error: "Карточка не найдена" });
     }
 
     const result = await GameResult.create({
@@ -91,7 +93,7 @@ exports.saveGameResult = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Ошибка сохранения результата' });
+    res.status(500).json({ error: "Ошибка сохранения результата" });
   }
 };
 
@@ -99,8 +101,8 @@ exports.saveGameResult = async (req, res) => {
 exports.getTop = async (req, res) => {
   try {
     const top = await GameResult.findAll({
-      attributes: ['player_name', 'score', 'telegram_user_id'],
-      order: [['score', 'DESC']],
+      attributes: ["player_name", "score", "telegram_user_id"],
+      order: [["score", "DESC"]],
       limit: 100,
       raw: true,
     });
@@ -108,7 +110,7 @@ exports.getTop = async (req, res) => {
     // Оставляем лучший результат для каждого пользователя
     const seen = new Set();
     const topUnique = [];
-    top.forEach(item => {
+    top.forEach((item) => {
       if (!seen.has(item.telegram_user_id)) {
         seen.add(item.telegram_user_id);
         topUnique.push(item);
@@ -124,18 +126,21 @@ exports.getTop = async (req, res) => {
     res.json(topWithRank);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Ошибка получения рейтинга' });
+    res.status(500).json({ error: "Ошибка получения рейтинга" });
   }
 };
 
 // Получение ранга игрока
 exports.getPlayerRank = async (req, res) => {
   try {
-    const telegram_user_id = req.tg_user?.id || req.query.userId || Math.round(Math.random() * 1000000);
+    const telegram_user_id =
+      req.tg_user?.id ||
+      req.query.userId ||
+      Math.round(Math.random() * 1000000);
 
     const playerBest = await GameResult.findOne({
       where: { telegram_user_id },
-      order: [['score', 'DESC']],
+      order: [["score", "DESC"]],
     });
 
     if (!playerBest) {
@@ -148,6 +153,6 @@ exports.getPlayerRank = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Ошибка получения рейтинга' });
+    res.status(500).json({ error: "Ошибка получения рейтинга" });
   }
 };
