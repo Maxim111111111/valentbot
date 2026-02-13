@@ -3,6 +3,15 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
+const fs = require('fs');
+
+// Ensure uploads directory exists (used by multer for temporary storage)
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('🔧 Created uploads directory:', uploadsDir);
+}
+
 const sequelize = require("./src/config/database");
 const apiRoutes = require("./src/routes/api");
 
