@@ -39,9 +39,18 @@ console.log("\n📋 Configuration:");
 console.log("  NODE_ENV:", process.env.NODE_ENV);
 console.log("  PORT:", PORT);
 console.log("  APP_URL:", process.env.APP_URL);
-console.log("  TELEGRAM_BOT_TOKEN:", process.env.TELEGRAM_BOT_TOKEN ? "✓ Set" : "❌ Missing");
-console.log("  CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME ? "✓ Set" : "❌ Missing");
-console.log("  DATABASE_URL:", process.env.DATABASE_URL ? "✓ Set" : "Will be constructed from env vars");
+console.log(
+  "  TELEGRAM_BOT_TOKEN:",
+  process.env.TELEGRAM_BOT_TOKEN ? "✓ Set" : "❌ Missing",
+);
+console.log(
+  "  CLOUDINARY_CLOUD_NAME:",
+  process.env.CLOUDINARY_CLOUD_NAME ? "✓ Set" : "❌ Missing",
+);
+console.log(
+  "  DATABASE_URL:",
+  process.env.DATABASE_URL ? "✓ Set" : "Will be constructed from env vars",
+);
 console.log("");
 
 const startServer = async () => {

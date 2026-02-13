@@ -1,13 +1,13 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const { v4: uuidv4 } = require("uuid");
+const { randomUUID } = require("crypto");
 
 const Card = sequelize.define(
   "Card",
   {
     id: {
       type: DataTypes.UUID,
-      defaultValue: () => uuidv4(),
+      defaultValue: () => randomUUID(),
       primaryKey: true,
     },
     recipient_name: {
