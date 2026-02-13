@@ -50,7 +50,9 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
   const playOpenSound = () => {
     try {
       if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtxRef.current = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
       }
       const ctx = audioCtxRef.current;
       const o = ctx.createOscillator();
@@ -60,29 +62,34 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
       g.gain.value = 0.001;
       o.connect(g);
       g.connect(ctx.destination);
-      o.start();
-      g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
-      setTimeout(() => {
+      // accept optional type to vary sound
+      return (type = "default") => {
         try {
-          o.stop();
-        } catch (e) {}
-      }, 500);
-    } catch (e) {
-      // ignore
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="screen">
-        <div className="container">
-          <h1>Загрузка...</h1>
-        </div>
-      </div>
-    );
-  }
-
+          if (!audioCtxRef.current) {
+            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          const ctx = audioCtxRef.current;
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "sine";
+          if (type === "short_chime") o.frequency.value = 880;
+          else if (type === "soft_bell") o.frequency.value = 440;
+          else o.frequency.value = 520;
+          g.gain.value = 0.001;
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start();
+          g.gain.exponentialRampToValueAtTime(type === "soft_bell" ? 0.18 : 0.28, ctx.currentTime + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
+          setTimeout(() => {
+            try {
+              o.stop();
+            } catch (e) {}
+          }, 600);
+        } catch (e) {
+          // ignore
+        }
+      };
   if (!card) {
     return (
       <div className="screen">
@@ -109,7 +116,11 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
             ✨ Тебе пришла особенная валентинка...
           </motion.h1>
 
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             Нажми «Открыть», чтобы увидеть сюрприз
           </motion.p>
 
@@ -134,7 +145,9 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
   // --- Reveal animation (Screen 2) ---
   if (screen === "reveal") {
     // play short sound + vibrate
-    playOpenSound();
+    // play short sound + vibrate (use selected music if any)
+    const soundFn = playOpenSound();
+    soundFn(card.effects?.music || "default");
     try {
       if (navigator.vibrate) navigator.vibrate([40, 20, 30]);
     } catch (e) {}
@@ -179,11 +192,19 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
           <p>Нажато: {taps || 0}/3</p>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button className="btn-primary" onClick={() => setScreen("card")}>Пропустить</button>
-            <button className="btn-secondary" onClick={onBack}>← Назад</button>
+            <button className="btn-primary" onClick={() => setScreen("card")}>
+              Пропустить
+            </button>
+            <button className="btn-secondary" onClick={onBack}>
+              ← Назад
+            </button>
           </div>
 
-          {taps >= 3 && (() => { setTimeout(() => setScreen("card"), 150); return null; })()}
+          {taps >= 3 &&
+            (() => {
+              setTimeout(() => setScreen("card"), 150);
+              return null;
+            })()}
         </div>
       </div>
     );
@@ -192,7 +213,9 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
   // --- Card display (Screen 4) ---
   if (screen === "card") {
     return (
-      <div className={`screen card-screen theme-${card.theme || "pink"} font-${card.font_style || "sans"}`}>
+      <div
+        className={`screen card-screen theme-${card.theme || "pink"} font-${card.font_style || "sans"}`}
+      >
         <div className="container">
           {card.media_url && (
             <motion.div
@@ -212,20 +235,48 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
                   style={{ width: "100%", borderRadius: "12px" }}
                 />
               ) : (
-                <video src={card.media_url} controls style={{ width: "100%" }} />
+                <video
+                  src={card.media_url}
+                  controls
+                  style={{ width: "100%" }}
+                />
               )}
             </motion.div>
           )}
 
-          <motion.div className="card-content" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+          <motion.div
+            className="card-content"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+          >
             <h2>Привет, {card.recipient_name}! 👋</h2>
-            <p style={{ marginTop: "20px", fontSize: "16px" }}>{card.message_text}</p>
-            <p className="sender">От: {card.is_anonymous ? "Аноним 😊" : card.sender_name}</p>
+            <p style={{ marginTop: "20px", fontSize: "16px" }}>
+              {card.message_text}
+            </p>
+            <p className="sender">
+              От: {card.is_anonymous ? "Аноним 😊" : card.sender_name}
+            </p>
           </motion.div>
 
-          <motion.button className="btn-primary" onClick={() => { setScreen("game"); onPlayGame(); }} whileTap={{ scale: 0.96 }}>🎮 Сыграть</motion.button>
+          <motion.button
+            className="btn-primary"
+            onClick={() => {
+              setScreen("game");
+              onPlayGame();
+            }}
+            whileTap={{ scale: 0.96 }}
+          >
+            🎮 Сыграть
+          </motion.button>
 
-          <motion.button className="btn-secondary" onClick={() => setScreen("intro")} whileTap={{ scale: 0.98 }}>← Назад</motion.button>
+          <motion.button
+            className="btn-secondary"
+            onClick={() => setScreen("intro")}
+            whileTap={{ scale: 0.98 }}
+          >
+            ← Назад
+          </motion.button>
         </div>
       </div>
     );
@@ -239,7 +290,9 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
         <div className="container">
           <h1>Игра...</h1>
           <p>Если игра должна запуститься — вернитесь в карточку</p>
-          <button className="btn-secondary" onClick={() => setScreen("card")}>← Назад</button>
+          <button className="btn-secondary" onClick={() => setScreen("card")}>
+            ← Назад
+          </button>
         </div>
       </div>
     );
