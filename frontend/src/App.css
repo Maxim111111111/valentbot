@@ -1,0 +1,389 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.screen {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.container h1 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.container p {
+  color: #666;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkbox-group label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.file-input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-input input[type="file"] {
+  display: none;
+}
+
+.file-label {
+  display: block;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.file-label:hover {
+  transform: scale(1.02);
+}
+
+.file-label.active {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.file-preview {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.file-preview img,
+.file-preview video {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 10px;
+}
+
+.btn-primary,
+.btn-secondary {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+/* Сердечки и анимации */
+@keyframes heartFall {
+  0% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.falling-heart {
+  position: fixed;
+  font-size: 30px;
+  animation: heartFall 3s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes confetti {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.confetti {
+  position: fixed;
+  animation: confetti 3s ease-out forwards;
+  pointer-events: none;
+}
+
+.greeting-screen {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.greeting-content {
+  text-align: center;
+  color: white;
+}
+
+.greeting-content h1 {
+  font-size: 32px;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.hearts-container {
+  position: relative;
+  height: 300px;
+  margin-bottom: 40px;
+}
+
+.heart {
+  position: absolute;
+  font-size: 30px;
+}
+
+.card-content {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.card-content .sender {
+  color: #999;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.top-list {
+  margin-top: 20px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.rank-item:last-child {
+  border-bottom: none;
+}
+
+.rank-position {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 18px;
+  min-width: 30px;
+}
+
+.rank-name {
+  flex: 1;
+  margin-left: 15px;
+  text-align: left;
+}
+
+.rank-score {
+  font-weight: 600;
+  color: #764ba2;
+}
+
+.medal {
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+.game-canvas {
+  width: 100%;
+  height: 500px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  margin: 20px 0;
+  cursor: crosshair;
+}
+
+.score-display {
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.timer {
+  font-size: 24px;
+  color: white;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button-group button {
+  flex: 1;
+}
+
+.success-icon {
+  font-size: 60px;
+  text-align: center;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out;
+}
+
+.share-url {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.share-url input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.share-url button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
