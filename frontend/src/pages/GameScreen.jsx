@@ -3,16 +3,21 @@ import "../App.css";
 
 export default function GameScreen({ cardId, onComplete, onCancel }) {
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(25);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [gameActive, setGameActive] = useState(true);
   const [hearts, setHearts] = useState([]);
+  const [card, setCard] = useState(null);
+  const [multiplier, setMultiplier] = useState(1);
+  const [multiplierUntil, setMultiplierUntil] = useState(null);
+  const [spawnIntervalMs, setSpawnIntervalMs] = useState(600);
   const gameContainerRef = useRef(null);
   const heartIdRef = useRef(0);
+  const savedRef = useRef(false);
 
   useEffect(() => {
     if (timeLeft <= 0) {
       setGameActive(false);
-      saveResult();
+      if (!savedRef.current) saveResult();
       return;
     }
 
@@ -25,36 +30,70 @@ export default function GameScreen({ cardId, onComplete, onCancel }) {
     return () => clearTimeout(timer);
   }, [timeLeft, gameActive]);
 
+  // Spawn hearts with dynamic interval and types
   useEffect(() => {
     if (!gameActive) return;
+    let intervalId = null;
 
     const spawnHeart = () => {
       const id = heartIdRef.current++;
-      const isGolden = Math.random() < 0.1; // 10% шанс золотого сердца
+      // Decide heart type
+      const roll = Math.random();
+      let type = "normal"; // normal, golden, bomb, slow, multiplier
+      if (roll < 0.06)
+        type = "bomb"; // 6%
+      else if (roll < 0.14)
+        type = "golden"; // 8%
+      else if (roll < 0.18)
+        type = "slow"; // 4%
+      else if (roll < 0.22) type = "mult"; // 4%
+
       const heart = {
         id,
         left: Math.random() * 80 + 10,
         top: Math.random() * 60 + 10,
-        isGolden,
-        clicked: false,
+        type,
       };
       setHearts((prev) => [...prev, heart]);
 
-      // Удаляем сердце через 2 секунды
+      // remove after duration
+      const life = card?.game_duration_ms || 2000 || 2000;
       const timeout = setTimeout(() => {
         setHearts((prev) => prev.filter((h) => h.id !== id));
-      }, 2000);
-
+      }, life);
       return () => clearTimeout(timeout);
     };
 
-    const interval = setInterval(spawnHeart, 300);
-    return () => clearInterval(interval);
-  }, [gameActive]);
+    intervalId = setInterval(spawnHeart, spawnIntervalMs);
+    return () => clearInterval(intervalId);
+  }, [gameActive, spawnIntervalMs, card]);
 
-  const handleHeartClick = (id, isGolden) => {
+  const handleHeartClick = (id, type) => {
     setHearts((prev) => prev.filter((h) => h.id !== id));
-    setScore((prev) => prev + (isGolden ? 3 : 1));
+    if (type === "bomb") {
+      setScore((prev) => Math.max(0, prev - 2));
+      return;
+    }
+
+    if (type === "slow") {
+      // slow spawning temporarily
+      setSpawnIntervalMs((s) => s + 400);
+      setTimeout(() => setSpawnIntervalMs((s) => Math.max(250, s - 400)), 4000);
+      setScore((prev) => prev + 1 * multiplier);
+      return;
+    }
+
+    if (type === "mult") {
+      setMultiplier(2);
+      setMultiplierUntil(Date.now() + 5000);
+      setTimeout(() => setMultiplier(1), 5000);
+      setScore((prev) => prev + 1 * multiplier);
+      return;
+    }
+
+    // golden or normal
+    if (type === "golden") setScore((prev) => prev + 3 * multiplier);
+    else setScore((prev) => prev + 1 * multiplier);
   };
 
   const saveResult = async () => {
@@ -74,12 +113,39 @@ export default function GameScreen({ cardId, onComplete, onCancel }) {
       });
 
       const data = await response.json();
+      savedRef.current = true;
       onComplete(data.score);
     } catch (err) {
       console.error(err);
+      savedRef.current = true;
       onComplete(score);
     }
   };
+
+  // fetch card data (to get game_type / effects)
+  useEffect(() => {
+    fetch(`/api/cards/${cardId}`)
+      .then((r) => r.json())
+      .then((c) => {
+        setCard(c);
+        // map game type to difficulty
+        const g = c.game_type || "catch_hearts";
+        if (g === "catch_hearts") {
+          setTimeLeft(30);
+          setSpawnIntervalMs(600);
+        } else if (g === "reaction") {
+          setTimeLeft(20);
+          setSpawnIntervalMs(450);
+        } else if (g === "precision") {
+          setTimeLeft(25);
+          setSpawnIntervalMs(700);
+        } else if (g === "hunt") {
+          setTimeLeft(35);
+          setSpawnIntervalMs(500);
+        }
+      })
+      .catch((e) => console.error(e));
+  }, [cardId]);
 
   return (
     <div className="screen" style={{ backgroundColor: "#667eea" }}>
