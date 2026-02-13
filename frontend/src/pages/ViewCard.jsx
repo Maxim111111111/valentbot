@@ -166,7 +166,7 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
 
 // Simple confetti using emoji elements
 function triggerConfetti() {
-  const colors = ["#ff4d4f", "#ffb366", "#ffd666", "#ff85c0", "#b3f0ff"]; 
+  const colors = ["#ff4d4f", "#ffb366", "#ffd666", "#ff85c0", "#b3f0ff"];
   const count = 24;
   for (let i = 0; i < count; i++) {
     const el = document.createElement("div");
