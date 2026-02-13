@@ -20,7 +20,30 @@ function App() {
 
     // Проверяем URL параметры для загрузки карточки
     const params = new URLSearchParams(window.location.search);
-    const startParam = params.get("startapp");
+    let startParam = params.get("startapp");
+
+    // Fallback: try Telegram WebApp init data (start parameter may be passed there)
+    try {
+      const tg = window.Telegram && window.Telegram.WebApp;
+      if (!startParam && tg && tg.initDataUnsafe) {
+        const unsafe = tg.initDataUnsafe;
+        startParam =
+          unsafe.start_param ||
+          unsafe.startPayload ||
+          unsafe.start_payload ||
+          unsafe.start ||
+          startParam;
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // Fallback: check path like /card/:id or trailing id
+    if (!startParam) {
+      const pathMatch = window.location.pathname.match(/card\/(.+)|\/([0-9a-fA-F-]{6,})$/);
+      if (pathMatch) startParam = pathMatch[1] || pathMatch[2];
+    }
+
     if (startParam) {
       setCardId(startParam);
       setScreen("view");
