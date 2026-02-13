@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import "../App.css";
 
 export default function ViewCard({ cardId, onPlayGame, onBack }) {
@@ -76,13 +77,18 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
               💗
             </div>
           </div>
-          <button
+          <motion.button
             className="btn-primary pulse"
-            onClick={() => setScreen("card")}
+            onClick={() => {
+              setScreen("card");
+              triggerConfetti();
+            }}
+            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
             style={{ fontSize: "18px", padding: "20px" }}
           >
             🎁 Открыть
-          </button>
+          </motion.button>
         </div>
       </div>
     );
@@ -93,9 +99,22 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
       <div className="screen">
         <div className="container">
           {card.media_url && (
-            <div className="file-preview" style={{ marginBottom: "20px" }}>
+            <motion.div
+              className="file-preview"
+              style={{ marginBottom: "20px" }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.45 }}
+            >
               {card.media_type === "image" ? (
-                <img src={card.media_url} alt="Valentine" />
+                <motion.img
+                  src={card.media_url}
+                  alt="Valentine"
+                  initial={{ scale: 0.98 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.6 }}
+                  style={{ width: "100%", borderRadius: "12px" }}
+                />
               ) : (
                 <video
                   src={card.media_url}
@@ -103,10 +122,15 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
                   style={{ width: "100%" }}
                 />
               )}
-            </div>
+            </motion.div>
           )}
 
-          <div className="card-content">
+          <motion.div
+            className="card-content"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+          >
             <h2>Привет, {card.recipient_name}! 👋</h2>
             <p style={{ marginTop: "20px", fontSize: "16px" }}>
               {card.message_text}
@@ -114,26 +138,44 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
             <p className="sender">
               От: {card.is_anonymous ? "Аноним 😊" : card.sender_name}
             </p>
-          </div>
+          </motion.div>
 
-          <button
+          <motion.button
             className="btn-primary"
             onClick={() => {
               onPlayGame();
               setScreen("card");
             }}
+            whileTap={{ scale: 0.96 }}
           >
             🎮 Сыграть
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             className="btn-secondary"
             onClick={() => setScreen("greeting")}
+            whileTap={{ scale: 0.98 }}
           >
             ← Назад
-          </button>
+          </motion.button>
         </div>
       </div>
     );
+  }
+}
+
+// Simple confetti using emoji elements
+function triggerConfetti() {
+  const colors = ["#ff4d4f", "#ffb366", "#ffd666", "#ff85c0", "#b3f0ff"]; 
+  const count = 24;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement("div");
+    el.className = "confetti";
+    el.style.left = `${Math.random() * 100}%`;
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.transform = `rotate(${Math.random() * 360}deg)`;
+    el.textContent = ["✨", "🎉", "💖", "💌"][Math.floor(Math.random() * 4)];
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500 + Math.random() * 1000);
   }
 }
