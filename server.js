@@ -13,6 +13,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 const sequelize = require("./src/config/database");
+const { Sequelize } = require("sequelize");
 const apiRoutes = require("./src/routes/api");
 // Start Telegram bot (optional - will warn if TELEGRAM_BOT_TOKEN is missing)
 try {
@@ -72,6 +73,26 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
     console.log("✅ Database connected");
+
+    // Ensure cards table has the new columns added by recent updates
+    try {
+      const qi = sequelize.getQueryInterface();
+      const table = await qi.describeTable("cards");
+      const addIfMissing = async (name, def) => {
+        if (!table[name]) {
+          console.log(`🔧 Adding missing column ${name} to cards`);
+          await qi.addColumn("cards", name, def);
+        }
+      };
+
+      await addIfMissing("card_type", { type: Sequelize.STRING, allowNull: true });
+      await addIfMissing("theme", { type: Sequelize.STRING, allowNull: true });
+      await addIfMissing("font_style", { type: Sequelize.STRING, allowNull: true });
+      await addIfMissing("effects", { type: Sequelize.JSON, allowNull: true });
+      await addIfMissing("game_type", { type: Sequelize.STRING, allowNull: true });
+    } catch (e) {
+      console.warn("Could not ensure columns on cards table:", e.message || e);
+    }
 
     await sequelize.sync({ alter: process.env.NODE_ENV === "development" });
     console.log("✅ Database synced");
