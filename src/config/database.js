@@ -6,14 +6,17 @@ let databaseUrl = process.env.DATABASE_URL || process.env.DATABASE_PUBLIC_URL;
 
 // Если DATABASE_URL содержит internal домен, нужно использовать публичный хост
 if (databaseUrl && databaseUrl.includes("railway.internal")) {
-  console.log("⚠️  DATABASE_URL содержит internal домен, переконструирую с публичным хостом...");
-  
+  console.log(
+    "⚠️  DATABASE_URL содержит internal домен, переконструирую с публичным хостом...",
+  );
+
   // Извлекаем переменные и собираем с публичным хостом
   const host = process.env.RAILWAY_TCP_PROXY_DOMAIN || "localhost";
   const port = process.env.RAILWAY_TCP_PROXY_PORT || 5432;
   const user = process.env.PGUSER || "postgres";
   const password = process.env.POSTGRES_PASSWORD || "";
-  const database = process.env.PGDATABASE || process.env.POSTGRES_DB || "railway";
+  const database =
+    process.env.PGDATABASE || process.env.POSTGRES_DB || "railway";
 
   databaseUrl = `postgresql://${user}:${password}@${host}:${port}/${database}`;
   console.log(

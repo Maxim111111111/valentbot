@@ -3,17 +3,23 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
-const fs = require('fs');
+const fs = require("fs");
 
 // Ensure uploads directory exists (used by multer for temporary storage)
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('🔧 Created uploads directory:', uploadsDir);
+  console.log("🔧 Created uploads directory:", uploadsDir);
 }
 
 const sequelize = require("./src/config/database");
 const apiRoutes = require("./src/routes/api");
+// Start Telegram bot (optional - will warn if TELEGRAM_BOT_TOKEN is missing)
+try {
+  require("./src/bot");
+} catch (err) {
+  console.warn("⚠️ Failed to initialize Telegram bot:", err.message || err);
+}
 
 const app = express();
 
