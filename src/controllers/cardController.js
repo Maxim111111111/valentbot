@@ -1,4 +1,4 @@
-const { Card, GameResult } = require("../models");
+const { Card, GameResult, Player } = require("../models");
 const cloudinary = require("../config/cloudinary");
 const { Op } = require("sequelize");
 
@@ -107,13 +107,92 @@ exports.saveGameResult = async (req, res) => {
       score,
     });
 
-    res.status(201).json({
-      id: result.id,
-      score: result.score,
-    });
+    // Update or create player stats
+    try {
+      const [player, created] = await Player.findOrCreate({
+        where: { telegram_user_id: String(telegram_user_id) },
+        defaults: { username: player_name, avatar: null },
+      });
+
+      // increment games_played
+      player.games_played = (player.games_played || 0) + 1;
+
+      // update username if changed
+      if (player_name && player.username !== player_name)
+        player.username = player_name;
+
+      // update best score
+      if (!player.best_score || score > player.best_score)
+        player.best_score = score;
+
+      // compute total score across games
+      const totalScore = await GameResult.sum("score", {
+        where: { telegram_user_id: String(telegram_user_id) },
+      });
+
+      // compute achievements (basic rules)
+      const achievements = player.achievements || {};
+      if (totalScore >= 50) achievements.heart_hunter = true;
+      if (totalScore >= 100) achievements.unstoppable = true;
+      if (score >= 20) achievements.speed_master = true;
+      if (player.best_score >= 200) achievements.valentine_king = true;
+      // anonymous legend: awarded if this card was anonymous and this player's score is top for that card
+      if (card.is_anonymous) {
+        const topForCard = await GameResult.findOne({
+          where: { card_id },
+          order: [["score", "DESC"]],
+        });
+        if (
+          topForCard &&
+          String(topForCard.telegram_user_id) === String(telegram_user_id)
+        ) {
+          achievements.anonymous_legend = true;
+        }
+      }
+
+      player.achievements = achievements;
+      await player.save();
+    } catch (err) {
+      console.error("Failed to update player stats:", err);
+    }
+
+    res.status(201).json({ id: result.id, score: result.score });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Ошибка сохранения результата" });
+  }
+};
+
+// Получение профиля игрока по telegram id
+exports.getProfile = async (req, res) => {
+  try {
+    const telegramId = req.params.telegramId;
+    const player = await Player.findOne({
+      where: { telegram_user_id: String(telegramId) },
+    });
+    if (!player) return res.status(404).json({ error: "Player not found" });
+
+    // best results sample
+    const best = await GameResult.findAll({
+      where: { telegram_user_id: String(telegramId) },
+      order: [["score", "DESC"]],
+      limit: 10,
+    });
+
+    res.json({
+      player: {
+        telegram_user_id: player.telegram_user_id,
+        username: player.username,
+        avatar: player.avatar,
+        best_score: player.best_score,
+        games_played: player.games_played,
+        achievements: player.achievements || {},
+      },
+      best_results: best,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Ошибка получения профиля" });
   }
 };
 

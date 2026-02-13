@@ -37,7 +37,9 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
     return (type = "default") => {
       try {
         if (!audioCtxRef.current) {
-          audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+          audioCtxRef.current = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
         }
         const ctx = audioCtxRef.current;
         const o = ctx.createOscillator();
@@ -50,7 +52,10 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
         o.connect(g);
         g.connect(ctx.destination);
         o.start();
-        g.gain.exponentialRampToValueAtTime(type === "soft_bell" ? 0.18 : 0.28, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(
+          type === "soft_bell" ? 0.18 : 0.28,
+          ctx.currentTime + 0.02,
+        );
         g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
         setTimeout(() => {
           try {
@@ -61,14 +66,14 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
         // ignore
       }
     };
-          g.gain.value = 0.001;
+  };
 
   // When we reach the card screen, trigger confetti/hearts based on effects
   useEffect(() => {
     if (!card) return;
     if (screen === "card") {
       // confetti
-      if (card.effects?.confetti) triggerConfetti();
+      if (card.effects?.confetti) triggerConfetti()();
 
       // spawn a few falling hearts if enabled
       if (card.effects?.hearts) {
@@ -87,20 +92,7 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
       }
     }
   }, [screen, card]);
-          o.connect(g);
-          g.connect(ctx.destination);
-          o.start();
-          g.gain.exponentialRampToValueAtTime(type === "soft_bell" ? 0.18 : 0.28, ctx.currentTime + 0.02);
-          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
-          setTimeout(() => {
-            try {
-              o.stop();
-            } catch (e) {}
-          }, 600);
-        } catch (e) {
-          // ignore
-        }
-      };
+
   if (!card) {
     return (
       <div className="screen">
@@ -224,7 +216,9 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
   // --- Card display (Screen 4) ---
   if (screen === "card") {
     return (
-      <div className={`screen card-screen theme-${card.theme || "pink"} font-${card.font_style || "sans"}`}>
+      <div
+        className={`screen card-screen theme-${card.theme || "pink"} font-${card.font_style || "sans"}`}
+      >
         <div id="bg-layer" className="bg-layer" />
         <div className="container">
           {card.media_url && (

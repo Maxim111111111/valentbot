@@ -44,5 +44,6 @@ router.get("/top", cardController.getTop);
 
 // GET /api/rank - получить ранг игрока
 router.get("/rank", validateTelegramData, cardController.getPlayerRank);
+router.get("/profile/:telegramId", cardController.getProfile);
 
 module.exports = router;
