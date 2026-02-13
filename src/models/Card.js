@@ -34,6 +34,26 @@ const Card = sequelize.define(
       type: DataTypes.STRING(50),
       allowNull: true,
     },
+    card_type: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    theme: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    font_style: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    effects: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    game_type: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
     created_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

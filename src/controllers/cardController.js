@@ -5,8 +5,17 @@ const { Op } = require("sequelize");
 // Создание валентинки
 exports.createCard = async (req, res) => {
   try {
-    const { recipient_name, sender_name, is_anonymous, message_text } =
-      req.body;
+    const {
+      recipient_name,
+      sender_name,
+      is_anonymous,
+      message_text,
+      card_type,
+      theme,
+      font_style,
+      effects,
+      game_type,
+    } = req.body;
     let media_url = null;
     let media_type = null;
 
@@ -27,6 +36,11 @@ exports.createCard = async (req, res) => {
       message_text,
       media_url,
       media_type,
+      card_type: card_type || null,
+      theme: theme || null,
+      font_style: font_style || null,
+      effects: effects ? JSON.parse(effects) : null,
+      game_type: game_type || null,
     });
 
     res.status(201).json({
