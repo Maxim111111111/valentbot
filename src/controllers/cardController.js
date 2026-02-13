@@ -32,7 +32,8 @@ exports.createCard = async (req, res) => {
     res.status(201).json({
       id: card.id,
       url: `${process.env.APP_URL}/card/${card.id}`,
-      shareUrl: `https://t.me/${process.env.TELEGRAM_BOT_USERNAME}?startapp=${card.id}`,
+      // Use Telegram deep link with `start` so bot receives payload
+      shareUrl: `https://t.me/${process.env.TELEGRAM_BOT_USERNAME}?start=${card.id}`,
     });
   } catch (err) {
     console.error(err);

@@ -14,7 +14,13 @@ const bot = new Telegraf(token);
 
 bot.start(async (ctx) => {
   try {
-    const payload = ctx.startPayload || "";
+    // Robust extraction of start payload (deep link):
+    let payload = "";
+    if (ctx.startPayload) payload = ctx.startPayload;
+    else if (ctx.update && ctx.update.message && ctx.update.message.text) {
+      const parts = ctx.update.message.text.split(" ");
+      if (parts.length > 1) payload = parts.slice(1).join(" ");
+    }
     const cardId = payload || "";
     const webAppUrl = appUrl
       ? `${appUrl.replace(/\/$/, "")}/?startapp=${cardId}`

@@ -40,7 +40,9 @@ function App() {
 
     // Fallback: check path like /card/:id or trailing id
     if (!startParam) {
-      const pathMatch = window.location.pathname.match(/card\/(.+)|\/([0-9a-fA-F-]{6,})$/);
+      const pathMatch = window.location.pathname.match(
+        /card\/(.+)|\/([0-9a-fA-F-]{6,})$/,
+      );
       if (pathMatch) startParam = pathMatch[1] || pathMatch[2];
     }
 
@@ -113,7 +115,8 @@ function ShareCard({ cardId, onBack }) {
       .catch((err) => console.error(err));
   }, [cardId]);
 
-  const shareUrl = `https://t.me/valentinmvbot?startapp=${cardId}`;
+  // Use Telegram deep link `start` so bot receives payload and can send web_app button
+  const shareUrl = `https://t.me/valentinmvbot?start=${cardId}`;
 
   const handleShare = () => {
     if (navigator.share) {
