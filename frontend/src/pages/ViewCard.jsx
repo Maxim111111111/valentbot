@@ -33,49 +33,60 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
   }, [screen]);
 
   const triggerConfetti = () => {
-    const colors = ["#ff4d4f", "#ffb366", "#ffd666", "#ff85c0", "#b3f0ff"];
-    const count = 18;
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement("div");
-      el.className = "confetti";
-      el.style.left = `${Math.random() * 100}%`;
-      el.style.background = colors[Math.floor(Math.random() * colors.length)];
-      el.style.transform = `rotate(${Math.random() * 360}deg)`;
-      el.textContent = ["✨", "🎉", "💖", "💌"][Math.floor(Math.random() * 4)];
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 3500 + Math.random() * 1000);
-    }
-  };
-
-  const playOpenSound = () => {
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (
-          window.AudioContext || window.webkitAudioContext
-        )();
+    // returns a function that plays a short tone for the given type
+    return (type = "default") => {
+      try {
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const ctx = audioCtxRef.current;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+        if (type === "short_chime") o.frequency.value = 880;
+        else if (type === "soft_bell") o.frequency.value = 440;
+        else o.frequency.value = 520;
+        g.gain.value = 0.001;
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start();
+        g.gain.exponentialRampToValueAtTime(type === "soft_bell" ? 0.18 : 0.28, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
+        setTimeout(() => {
+          try {
+            o.stop();
+          } catch (e) {}
+        }, 600);
+      } catch (e) {
+        // ignore
       }
-      const ctx = audioCtxRef.current;
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      o.frequency.value = 520;
-      g.gain.value = 0.001;
-      o.connect(g);
-      g.connect(ctx.destination);
-      // accept optional type to vary sound
-      return (type = "default") => {
-        try {
-          if (!audioCtxRef.current) {
-            audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-          }
-          const ctx = audioCtxRef.current;
-          const o = ctx.createOscillator();
-          const g = ctx.createGain();
-          o.type = "sine";
-          if (type === "short_chime") o.frequency.value = 880;
-          else if (type === "soft_bell") o.frequency.value = 440;
-          else o.frequency.value = 520;
+    };
           g.gain.value = 0.001;
+
+  // When we reach the card screen, trigger confetti/hearts based on effects
+  useEffect(() => {
+    if (!card) return;
+    if (screen === "card") {
+      // confetti
+      if (card.effects?.confetti) triggerConfetti();
+
+      // spawn a few falling hearts if enabled
+      if (card.effects?.hearts) {
+        const heartsCount = 12;
+        const hearts = [];
+        for (let i = 0; i < heartsCount; i++) {
+          const el = document.createElement("div");
+          el.className = "falling-heart";
+          el.textContent = "❤️";
+          el.style.left = `${Math.random() * 100}%`;
+          el.style.fontSize = `${16 + Math.random() * 24}px`;
+          document.body.appendChild(el);
+          hearts.push(el);
+        }
+        setTimeout(() => hearts.forEach((h) => h.remove()), 4000);
+      }
+    }
+  }, [screen, card]);
           o.connect(g);
           g.connect(ctx.destination);
           o.start();
@@ -213,9 +224,8 @@ export default function ViewCard({ cardId, onPlayGame, onBack }) {
   // --- Card display (Screen 4) ---
   if (screen === "card") {
     return (
-      <div
-        className={`screen card-screen theme-${card.theme || "pink"} font-${card.font_style || "sans"}`}
-      >
+      <div className={`screen card-screen theme-${card.theme || "pink"} font-${card.font_style || "sans"}`}>
+        <div id="bg-layer" className="bg-layer" />
         <div className="container">
           {card.media_url && (
             <motion.div
